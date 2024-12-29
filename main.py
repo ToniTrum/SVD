@@ -1,12 +1,13 @@
 from PIL import Image
 import numpy
 import math
+import os
 
 approximation_ratio = float(input("Введите процент аппроксимации: "))
 img_path = input("\033[0mВведите путь к файлу: ")
 print()
 
-rgba_dict = {
+rgb_dict = {
     0: "\033[31mRed-channel\033[0m",
     1: "\033[32mGreen-channel\033[0m",
     2: "\033[34mBlue-channel\033[0m"
@@ -17,7 +18,7 @@ matrix = numpy.array(image)
 
 channels = []
 for i in range(matrix.shape[-1]):  # R, G, B
-    print(f"Approximation {rgba_dict[i]} matrix...")
+    print(f"Approximation {rgb_dict[i]} matrix...")
     U, Sigma, V_T = numpy.linalg.svd(matrix[:, :, i], full_matrices=False)
 
     # Значеня для усечения нулевых строк и столбцов
@@ -55,4 +56,13 @@ approx_matrix = numpy.stack(channels, axis=2).astype(numpy.uint8)
 approx_image = Image.fromarray(approx_matrix, mode="RGB")
 
 approx_image.save(image_name)
-print("\033[42mDone!\033[0m")
+print("\033[42mDone!\033[0m\n")
+
+# Вычисление процента сжатия
+original_size = os.path.getsize(img_path)
+compressed_size = os.path.getsize(image_name)
+compression_ratio = (1 - compressed_size / original_size) * 100
+
+print(f"Original size: \033[33m{original_size}\033[0m bytes")
+print(f"Compressed size: \033[33m{compressed_size}\033[0m bytes")
+print(f"Compression ratio: \033[32m{compression_ratio:.2f}%\033[0m")

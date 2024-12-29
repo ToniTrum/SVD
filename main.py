@@ -2,20 +2,20 @@ from PIL import Image
 import numpy
 import math
 
+approximation_ratio = float(input("Введите процент аппроксимации: "))
+img_path = input("Введите путь к файлу: ")
+
 rgba_dict = {
     0: "Red-channel",
     1: "Green-channel",
-    2: "Blue-channel",
-    3: "Alpha-channel"
+    2: "Blue-channel"
 }
 
-image = Image.open('img.jpg')
+image = Image.open(img_path)
 matrix = numpy.array(image)
 
-compression_ratio = float(input("Введите процент сжатия: "))
-
 channels = []
-for i in range(matrix.shape[2]):  # R, G, B[, A]
+for i in range(matrix.shape[-1]):  # R, G, B
     print(f"Approximation {rgba_dict[i]} matrix...")
     U, Sigma, V_T = numpy.linalg.svd(matrix[:, :, i], full_matrices=False)
 
@@ -34,26 +34,24 @@ for i in range(matrix.shape[2]):  # R, G, B[, A]
         V_T = V_T[:row_count_V_T, :]
 
     # Аппроксимизация матриц
-    approximation_coefficient = math.ceil((100 - compression_ratio) / 100 * Sigma.shape[0])
+    approximation_coefficient = math.ceil((100 - approximation_ratio) / 100 * Sigma.shape[0])
     print("Approximation coefficient:", approximation_coefficient)
 
     approx_U = U[:, :approximation_coefficient]
     approx_Sigma = numpy.diag(Sigma[:approximation_coefficient])
-    approx_V_t = V_T[:approximation_coefficient, :]
+    approx_V_T = V_T[:approximation_coefficient, :]
 
-    approx_A = approx_U @ approx_Sigma @ approx_V_t
+    approx_A = approx_U @ approx_Sigma @ approx_V_T
+    approx_A = numpy.clip(approx_A, 0, 255)
     approx_A = numpy.round(approx_A)
-    channels.append(approx_A.astype('uint8'))
+
+    channels.append(approx_A)
+
+image_name = "approx_image.jpg"
+print("Creation approx image...")
 
 approx_matrix = numpy.stack(channels, axis=2).astype(numpy.uint8)
+approx_image = Image.fromarray(approx_matrix, mode="RGB")
 
-print("Creation approx image...")
-image_name = "approx_image."
-if matrix.shape[-1] == 3:
-    image_name += "jpg"
-    approx_image = Image.fromarray(approx_matrix, mode="RGB")
-elif matrix.shape[-1] == 4:
-    image_name += "png"
-    approx_image = Image.fromarray(approx_matrix, mode="RGBA")
 approx_image.save(image_name)
 print("Done!")

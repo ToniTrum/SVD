@@ -3,12 +3,13 @@ import numpy
 import math
 
 approximation_ratio = float(input("Введите процент аппроксимации: "))
-img_path = input("Введите путь к файлу: ")
+img_path = input("\033[0mВведите путь к файлу: ")
+print()
 
 rgba_dict = {
-    0: "Red-channel",
-    1: "Green-channel",
-    2: "Blue-channel"
+    0: "\033[31mRed-channel\033[0m",
+    1: "\033[32mGreen-channel\033[0m",
+    2: "\033[34mBlue-channel\033[0m"
 }
 
 image = Image.open(img_path)
@@ -35,7 +36,7 @@ for i in range(matrix.shape[-1]):  # R, G, B
 
     # Аппроксимизация матриц
     approximation_coefficient = math.ceil((100 - approximation_ratio) / 100 * Sigma.shape[0])
-    print("Approximation coefficient:", approximation_coefficient)
+    print(f"Approximation coefficient: \033[33m{approximation_coefficient}\033[0m")
 
     approx_U = U[:, :approximation_coefficient]
     approx_Sigma = numpy.diag(Sigma[:approximation_coefficient])
@@ -54,4 +55,4 @@ approx_matrix = numpy.stack(channels, axis=2).astype(numpy.uint8)
 approx_image = Image.fromarray(approx_matrix, mode="RGB")
 
 approx_image.save(image_name)
-print("Done!")
+print("\033[42mDone!\033[0m")
